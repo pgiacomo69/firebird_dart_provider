@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       fbProvider=FbProvider(database: 'PubManagerDb'
-          '',userId: 'sysdba',password: 'masterkey',dataSource: '127.0.0.1');
+          '',userId: 'sysdba',password: 'masterkey',dataSource: 'localhost');
       if (fbProvider!.connect()){
        fbProvider!.executeSql('create table pippo (a integer, b integer);');
       };

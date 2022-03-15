@@ -18,7 +18,8 @@ class FbTransaction extends BaseDbTransaction<FbProvider,ffi.Pointer<isc_tr_hand
 
   bool _active=false;
 
-  bool get active {
+  @override
+  bool getActive() {
     return _active;
   }
 

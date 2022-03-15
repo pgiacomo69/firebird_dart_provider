@@ -121,9 +121,12 @@ abstract class BaseDbProvider<DbBindingsType, DbConnType extends BaseDbConnectio
     bool result=false;
     bool singleTransaction=false;
     if (transaction==null) {
-      transaction=getNewTransaction();
-      singleTransaction=true;
-      if (transaction.start()) {
+      transaction=currentTransaction;
+      if (transaction==null) {
+        transaction=getNewTransaction()..start();
+        singleTransaction = true;
+      }
+      if (transaction.active) {
         result=executeSqlInternal(sql,transaction);
       }
     }
@@ -192,6 +195,9 @@ abstract class BaseDbTransaction<ProviderType, DbTransType> extends BaseDbClass 
   TrIsolationLevel isolationLevel;
   ProviderType provider;
   bool readOnly;
+  bool get active { return getActive();}
+
+  bool getActive();
 
   BaseDbTransaction(
       {required this.provider,
