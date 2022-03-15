@@ -59,14 +59,20 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      fbProvider ??= FbProvider(database: 'PubManagerDb',connectNow: false, userId: 'sysdba',password: 'masterkey',dataSource: 'localhost')..connect();
-       var transazione=fbProvider!.startTransaction();
-       fbProvider!.executeSql( 'insert into  pippo (a, b) values ($_counter,1);',transaction: transazione);
-       transazione!.commit();
-      transazione.dispose();
+      fbProvider ??= FbProvider(database: 'PubManagerDb',connectNow: false, userId: 'sysdba',password: 'masterkey',dataSource: 'localhost');
+      if (!fbProvider!.connected) {fbProvider!.connect();}
+       if (fbProvider!.connected) {
+         var transazione = fbProvider!.startTransaction();
+         fbProvider!.executeSql(
+             'insert into  pippo (a, b) values ($_counter,1);',
+             transaction: transazione);
+         transazione!.commit();
+         transazione.dispose();
+       }
 
-      _counter++;
-    });
+         _counter++;
+       }
+    );
   }
 
   @override
