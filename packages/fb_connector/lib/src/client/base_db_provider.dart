@@ -13,7 +13,9 @@ abstract class BaseDbClass {
   void dispose();
 }
 
-abstract class BaseDbProvider<DbBindingsType, DbConnType extends BaseDbConnection,
+abstract class BaseDbProvider<
+    DbBindingsType,
+    DbConnType extends BaseDbConnection,
     DbTransType extends BaseDbTransaction> extends BaseDbClass {
   String dataSource;
   String database;
@@ -67,8 +69,8 @@ abstract class BaseDbProvider<DbBindingsType, DbConnType extends BaseDbConnectio
       final DbConnType conn = getNewConnection();
       if (conn.connect()) {
         currentConnection = conn;
-        currentTransaction=startTransaction();
-        result=true;
+        currentTransaction = startTransaction();
+        result = true;
       } else {
         conn.dispose();
       }
@@ -76,20 +78,19 @@ abstract class BaseDbProvider<DbBindingsType, DbConnType extends BaseDbConnectio
     return result;
   }
 
-  DbTransType? startTransaction({bool readOnly=false,
-    TrIsolationLevel isolationLevel = TrIsolationLevel.readCommitted}){
-     DbTransType? trans = getNewTransaction(isolationLevel: isolationLevel,readOnly: readOnly);
-      if (trans.start()) {
-        currentTransaction = trans;
-
-      } else {
-        trans.dispose();
-        trans=null;
-      }
+  DbTransType? startTransaction(
+      {bool readOnly = false,
+      TrIsolationLevel isolationLevel = TrIsolationLevel.readCommitted}) {
+    DbTransType? trans =
+        getNewTransaction(isolationLevel: isolationLevel, readOnly: readOnly);
+    if (trans.start()) {
+      currentTransaction = trans;
+    } else {
+      trans.dispose();
+      trans = null;
+    }
     return trans;
-}
-
-
+  }
 
   DbConnType getNewConnection();
 
@@ -103,7 +104,9 @@ abstract class BaseDbProvider<DbBindingsType, DbConnType extends BaseDbConnectio
     }
   }
 
-  DbTransType getNewTransaction({TrIsolationLevel isolationLevel=TrIsolationLevel.readCommitted,bool readOnly=false});
+  DbTransType getNewTransaction(
+      {TrIsolationLevel isolationLevel = TrIsolationLevel.readCommitted,
+      bool readOnly = false});
 
   void disposeTransaction() {
     if (currentTransaction != null) {
@@ -115,32 +118,35 @@ abstract class BaseDbProvider<DbBindingsType, DbConnType extends BaseDbConnectio
     }
   }
 
-  bool executeSqlInternal(String sql,BaseDbTransaction transaction);
+  bool executeSqlInternal(String sql, BaseDbTransaction transaction);
 
-  bool executeSql(String sql,{BaseDbTransaction? transaction,}){
-    bool result=false;
-    bool singleTransaction=false;
-    if (transaction==null) {
-      transaction=currentTransaction;
-      if (transaction==null) {
-        transaction=getNewTransaction()..start();
+  bool executeSql(
+    String sql, {
+    BaseDbTransaction? transaction,
+  }) {
+    bool result = false;
+    bool singleTransaction = false;
+    if (transaction == null) {
+      transaction = currentTransaction;
+      if (transaction == null) {
+        transaction = getNewTransaction()..start();
+      } else {
         singleTransaction = true;
       }
-      if (transaction.active) {
-        result=executeSqlInternal(sql,transaction);
-      }
     }
-    if (singleTransaction)
-      {
+    if (transaction.active) {
+      result = executeSqlInternal(sql, transaction);
+      if (singleTransaction) {
         switch (result) {
           case true:
-          transaction.commit(renew: true);
-          break;
+            transaction.commit(renew: true);
+            break;
           case false:
             transaction.rollback(renew: true);
-          }
-          transaction.dispose();
+        }
+        transaction.dispose();
       }
+    }
     return result;
   }
 
@@ -163,9 +169,6 @@ abstract class BaseDbProvider<DbBindingsType, DbConnType extends BaseDbConnectio
     errorMsg = '';
     sqlErrorMsg = '';
   }
-
-
-
 
   bool isConnected() {
     return currentConnection != null;
@@ -190,21 +193,24 @@ abstract class BaseDbConnection<ProviderType, DbConnType> extends BaseDbClass {
   BaseDbConnection({required this.provider, required this.handler});
 }
 
-abstract class BaseDbTransaction<ProviderType, DbTransType> extends BaseDbClass {
+abstract class BaseDbTransaction<ProviderType, DbTransType>
+    extends BaseDbClass {
   DbTransType handler;
   TrIsolationLevel isolationLevel;
   ProviderType provider;
   bool readOnly;
-  bool get active { return getActive();}
+  bool get active {
+    return getActive();
+  }
 
   bool getActive();
 
   BaseDbTransaction(
       {required this.provider,
       required this.handler,
-      this.readOnly=false,
+      this.readOnly = false,
       this.isolationLevel = TrIsolationLevel.readCommitted});
   bool start();
-  bool commit({bool renew=false});
-  bool rollback({bool renew=false});
+  bool commit({bool renew = false});
+  bool rollback({bool renew = false});
 }
